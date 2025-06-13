@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -5,8 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Link as LinkIcon, Tag, Tags, Target, Sparkles, Copy } from 'lucide-react';
+
+const utmSourceOptions = [
+  "google", "blog", "gmail", "email", "youtube", "tiktok", "instagram", 
+  "facebook", "linkedin", "whatsapp", "twitter", "zoom", "direct", 
+  "meta_ads", "google_ads", "tiktok_ads"
+];
 
 export default function Home() {
   const [baseUrl, setBaseUrl] = useState('');
@@ -118,13 +126,18 @@ export default function Home() {
             <Label htmlFor="utmSource" className="text-foreground">UTM Source</Label>
             <div className="flex items-center space-x-2">
               <Tag className="h-5 w-5 text-accent flex-shrink-0" />
-              <Input 
-                id="utmSource" 
-                placeholder="e.g., google, newsletter" 
-                value={utmSource} 
-                onChange={(e) => setUtmSource(e.target.value)}
-                className="focus:ring-primary focus:border-primary"
-              />
+              <Select value={utmSource} onValueChange={setUtmSource}>
+                <SelectTrigger id="utmSource" className="focus:ring-primary focus:border-primary">
+                  <SelectValue placeholder="Select a source" />
+                </SelectTrigger>
+                <SelectContent>
+                  {utmSourceOptions.map(option => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -187,3 +200,4 @@ export default function Home() {
     </main>
   );
 }
+
