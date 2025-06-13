@@ -1,14 +1,14 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Link as LinkIcon, Tag, Tags, Target, Sparkles, Copy } from 'lucide-react';
+import { Link as LinkIcon, Tag, Tags, Target, Sparkles, Copy, MessageSquareText } from 'lucide-react';
 
 const utmSourceOptions = [
   "google", "blog", "gmail", "email", "youtube", "tiktok", "instagram", 
@@ -16,13 +16,30 @@ const utmSourceOptions = [
   "meta_ads", "google_ads", "tiktok_ads"
 ];
 
+const utmCampaignOptions = [
+  { value: "channel_whatsApp", label: "Channel WhatsApp" },
+  { value: "whatsapp_grup", label: "WhatsApp Grup" },
+  { value: "personal_whatsapp", label: "Personal WhatsApp" },
+  { value: "lain_lain", label: "Lain Lain" }
+];
+
 export default function Home() {
   const [baseUrl, setBaseUrl] = useState('');
   const [utmSource, setUtmSource] = useState('');
   const [utmMedium, setUtmMedium] = useState('');
   const [utmCampaign, setUtmCampaign] = useState('');
+  const [selectedCampaignOption, setSelectedCampaignOption] = useState('');
+  const [customCampaign, setCustomCampaign] = useState('');
   const [generatedUrl, setGeneratedUrl] = useState('');
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (selectedCampaignOption === 'lain_lain') {
+      setUtmCampaign(customCampaign);
+    } else {
+      setUtmCampaign(selectedCampaignOption);
+    }
+  }, [selectedCampaignOption, customCampaign]);
 
   const handleGenerateLink = () => {
     if (!baseUrl.trim()) {
@@ -44,15 +61,25 @@ export default function Home() {
       setGeneratedUrl("");
       return;
     }
+    
+    // Ensure utmCampaign is populated if "lain_lain" is selected and custom field is empty
+    if (selectedCampaignOption === 'lain_lain' && !customCampaign.trim()) {
+        toast({
+            title: "Error",
+            description: "UTM Campaign (Lain Lain) is required.",
+            variant: "destructive",
+        });
+        setGeneratedUrl("");
+        return;
+    }
+
 
     try {
-      // Check if baseUrl is a valid URL structure before attempting to parse
-      // A simple check for protocol, can be enhanced
-      if (!baseUrl.match(/^https?:\/\/[^\s/$.?#].[^\s]*$/i) && !baseUrl.match(/^www\.[^\s/$.?#].[^\s]*$/i) && !baseUrl.match(/^[^\s/$.?#].[^\s]*\.[^\s/$.?#]{2,}/i)  ) {
-         // if it doesn't have http/https, try adding it
-         if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
-            const tempUrl = `https://${baseUrl}`;
-             if (!tempUrl.match(/^https?:\/\/[^\s/$.?#].[^\s]*$/i)) {
+      let tempBaseUrl = baseUrl;
+      if (!tempBaseUrl.match(/^https?:\/\/[^\s/$.?#].[^\s]*$/i) && !tempBaseUrl.match(/^www\.[^\s/$.?#].[^\s]*$/i) && !tempBaseUrl.match(/^[^\s/$.?#].[^\s]*\.[^\s/$.?#]{2,}/i)  ) {
+         if (!tempBaseUrl.startsWith('http://') && !tempBaseUrl.startsWith('https://')) {
+            tempBaseUrl = `https://${tempBaseUrl}`;
+             if (!tempBaseUrl.match(/^https?:\/\/[^\s/$.?#].[^\s]*$/i)) {
                 throw new Error("Invalid URL structure");
              }
          } else {
@@ -60,15 +87,16 @@ export default function Home() {
          }
       }
       
-      const url = new URL(baseUrl.startsWith('http') ? baseUrl : `https://${baseUrl}`);
+      const url = new URL(tempBaseUrl.startsWith('http') ? tempBaseUrl : `https://${tempBaseUrl}`);
 
       if (utmSource.trim()) url.searchParams.set("utm_source", utmSource.trim());
-      else url.searchParams.delete("utm_source"); // Should not happen if required
+      else url.searchParams.delete("utm_source");
       
       if (utmMedium.trim()) url.searchParams.set("utm_medium", utmMedium.trim());
       else url.searchParams.delete("utm_medium");
 
-      if (utmCampaign.trim()) url.searchParams.set("utm_campaign", utmCampaign.trim());
+      const finalUtmCampaign = selectedCampaignOption === 'lain_lain' ? customCampaign : utmCampaign;
+      if (finalUtmCampaign.trim()) url.searchParams.set("utm_campaign", finalUtmCampaign.trim());
       else url.searchParams.delete("utm_campaign");
 
       setGeneratedUrl(url.toString());
@@ -106,6 +134,16 @@ export default function Home() {
       });
   };
 
+  const handleCampaignChange = (value: string) => {
+    setSelectedCampaignOption(value);
+    if (value !== 'lain_lain') {
+      setUtmCampaign(value);
+      setCustomCampaign(''); // Clear custom campaign if not "lain_lain"
+    } else {
+      setUtmCampaign(''); // Clear utmCampaign when "lain_lain" is selected to wait for custom input
+    }
+  };
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-background p-4 sm:p-8 font-body">
       <Card className="w-full max-w-2xl shadow-xl rounded-lg">
@@ -136,7 +174,7 @@ export default function Home() {
             <Label htmlFor="utmSource" className="text-foreground">UTM Source*</Label>
             <div className="flex items-center space-x-2">
               <Tag className="h-5 w-5 text-accent flex-shrink-0" />
-              <Select value={utmSource} onValueChange={setUtmSource}>
+              <Select value={utmSource} onValueChange={setUtmSource} required>
                 <SelectTrigger id="utmSource" className="focus:ring-primary focus:border-primary">
                   <SelectValue placeholder="Select a source" />
                 </SelectTrigger>
@@ -169,14 +207,34 @@ export default function Home() {
             <Label htmlFor="utmCampaign" className="text-foreground">UTM Campaign</Label>
             <div className="flex items-center space-x-2">
               <Target className="h-5 w-5 text-accent flex-shrink-0" />
-              <Input 
-                id="utmCampaign" 
-                placeholder="e.g., summer_sale, product_launch" 
-                value={utmCampaign} 
-                onChange={(e) => setUtmCampaign(e.target.value)}
-                className="focus:ring-primary focus:border-primary"
-              />
+              <Select value={selectedCampaignOption} onValueChange={handleCampaignChange}>
+                <SelectTrigger id="utmCampaignSelect" className="focus:ring-primary focus:border-primary">
+                  <SelectValue placeholder="Select a campaign" />
+                </SelectTrigger>
+                <SelectContent>
+                  {utmCampaignOptions.map(option => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
+            {selectedCampaignOption === 'lain_lain' && (
+              <div className="space-y-2 mt-2 pl-7"> {/* pl-7 to align with icon + space */}
+                <Label htmlFor="customUtmCampaign" className="text-foreground">Campaign (Lain Lain)</Label>
+                <div className="flex items-center space-x-2">
+                 <MessageSquareText className="h-5 w-5 text-accent flex-shrink-0 opacity-0" /> {/* Placeholder for alignment */}
+                  <Input
+                    id="customUtmCampaign"
+                    placeholder="Enter custom campaign"
+                    value={customCampaign}
+                    onChange={(e) => setCustomCampaign(e.target.value)}
+                    className="focus:ring-primary focus:border-primary"
+                  />
+                </div>
+              </div>
+            )}
           </div>
           
           <Button onClick={handleGenerateLink} className="w-full text-base py-3 active:scale-[0.98] transition-transform duration-100 ease-in-out">
@@ -210,4 +268,3 @@ export default function Home() {
     </main>
   );
 }
-
