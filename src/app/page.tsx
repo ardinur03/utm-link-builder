@@ -35,6 +35,16 @@ export default function Home() {
       return;
     }
 
+    if (!utmSource) {
+      toast({
+        title: "Error",
+        description: "UTM Source is required.",
+        variant: "destructive",
+      });
+      setGeneratedUrl("");
+      return;
+    }
+
     try {
       // Check if baseUrl is a valid URL structure before attempting to parse
       // A simple check for protocol, can be enhanced
@@ -53,7 +63,7 @@ export default function Home() {
       const url = new URL(baseUrl.startsWith('http') ? baseUrl : `https://${baseUrl}`);
 
       if (utmSource.trim()) url.searchParams.set("utm_source", utmSource.trim());
-      else url.searchParams.delete("utm_source");
+      else url.searchParams.delete("utm_source"); // Should not happen if required
       
       if (utmMedium.trim()) url.searchParams.set("utm_medium", utmMedium.trim());
       else url.searchParams.delete("utm_medium");
@@ -123,7 +133,7 @@ export default function Home() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="utmSource" className="text-foreground">UTM Source</Label>
+            <Label htmlFor="utmSource" className="text-foreground">UTM Source*</Label>
             <div className="flex items-center space-x-2">
               <Tag className="h-5 w-5 text-accent flex-shrink-0" />
               <Select value={utmSource} onValueChange={setUtmSource}>
