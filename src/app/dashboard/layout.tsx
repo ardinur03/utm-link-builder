@@ -3,7 +3,7 @@
 
 import type { ReactNode } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation'; // Added useRouter
+import { usePathname, useRouter } from 'next/navigation';
 import {
   SidebarProvider,
   Sidebar,
@@ -18,20 +18,52 @@ import {
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Home, Settings, User, LogOut, Link2 as LinkIconLucide } from 'lucide-react';
-import { useToast } from "@/hooks/use-toast"; // Added useToast
+import { useToast } from "@/hooks/use-toast";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const router = useRouter(); // Initialize useRouter
-  const { toast } = useToast(); // Initialize useToast
+  const router = useRouter();
+  const { toast } = useToast();
 
-  const handleLogout = () => {
-    localStorage.removeItem('access_token'); // Remove token from localStorage
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  const handleLogout = async () => {
+    const token = localStorage.getItem('access_token');
+
+    if (token && apiBaseUrl) {
+      try {
+        await fetch(`${apiBaseUrl}/api/logout`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json', // Though no body is sent, it's good practice
+          },
+        });
+        // Assuming logout is successful or we want to proceed regardless
+      } catch (error) {
+        console.error("Logout API call failed:", error);
+        // Optionally, show an error toast, but still proceed to log out locally
+        toast({
+          title: "Logout Error",
+          description: "Could not reach logout service, logging out locally.",
+          variant: "destructive",
+        });
+      }
+    } else if (!apiBaseUrl) {
+       console.error("API base URL is not configured for logout.");
+       toast({
+          title: "Configuration Error",
+          description: "Logout service is not configured.",
+          variant: "destructive",
+        });
+    }
+
+    localStorage.removeItem('access_token');
     toast({
       title: "Logged Out",
       description: "You have been successfully logged out.",
     });
-    router.push('/login'); // Redirect to login page
+    router.push('/login');
   };
 
 
@@ -56,7 +88,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton asChild isActive={pathname === '/dashboard/utm-generator'} tooltip="UTM Generator">
-                <Link href="/dashboard/utm-generator"> {/* Updated href */}
+                <Link href="/dashboard/utm-generator">
                   <LinkIconLucide />
                   <span className="group-data-[collapsible=icon]:hidden">UTM Generator</span>
                 </Link>
