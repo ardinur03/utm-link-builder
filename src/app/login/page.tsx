@@ -64,9 +64,9 @@ export default function LoginPage() {
         throw new Error(errorMessage);
       }
 
-      // Assuming data contains access_token as per your example
-      // console.log("Access Token:", data.access_token); 
-      // In a real app, you'd store this token (e.g., in localStorage or httpOnly cookie)
+      if (data.access_token) {
+        localStorage.setItem('access_token', data.access_token);
+      }
 
       toast({
         title: "Login Successful",

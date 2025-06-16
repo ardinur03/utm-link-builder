@@ -3,7 +3,7 @@
 
 import type { ReactNode } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation'; // Added useRouter
 import {
   SidebarProvider,
   Sidebar,
@@ -17,21 +17,21 @@ import {
   SidebarMenuButton,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { Home, Settings, User, LogOut, Link2 as LinkIconLucide } from 'lucide-react'; // Renamed to avoid conflict
+import { Home, Settings, User, LogOut, Link2 as LinkIconLucide } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast"; // Added useToast
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter(); // Initialize useRouter
+  const { toast } = useToast(); // Initialize useToast
 
-  // A simple logout function placeholder
   const handleLogout = () => {
-    // Here you would typically clear tokens/session and redirect to login
-    console.log("Logout clicked");
-    // For now, let's redirect to login page as an example
-    // import { useRouter } from 'next/navigation';
-    // const router = useRouter();
-    // router.push('/login');
-    alert("Logout functionality to be implemented. Redirecting to /login for now.");
-    window.location.href = '/login'; // Simple redirect for now
+    localStorage.removeItem('access_token'); // Remove token from localStorage
+    toast({
+      title: "Logged Out",
+      description: "You have been successfully logged out.",
+    });
+    router.push('/login'); // Redirect to login page
   };
 
 
@@ -55,8 +55,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={pathname === '/'} tooltip="UTM Generator">
-                <Link href="/">
+              <SidebarMenuButton asChild isActive={pathname === '/dashboard/utm-generator'} tooltip="UTM Generator">
+                <Link href="/dashboard/utm-generator"> {/* Updated href */}
                   <LinkIconLucide />
                   <span className="group-data-[collapsible=icon]:hidden">UTM Generator</span>
                 </Link>
@@ -84,7 +84,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
-        <header className="flex items-center justify-between p-4 border-b sticky top-0 bg-background z-10 h-[57px]"> {/* Added fixed height */}
+        <header className="flex items-center justify-between p-4 border-b sticky top-0 bg-background z-10 h-[57px]">
           <div className="flex items-center">
             <SidebarTrigger className="mr-2" />
             <h1 className="text-xl font-semibold hidden sm:block">Dashboard</h1>
