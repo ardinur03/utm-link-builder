@@ -17,7 +17,7 @@ body {
     --popover: 0 0% 100%; /* White */
     --popover-foreground: 210 25% 25%; /* Dark Blue-Gray */
 
-    --primary: 173 58% 39%; /* Teal #2A9D8F */
+    --primary: 232 44% 30%; /* Deep Blue #2B346F */
     --primary-foreground: 0 0% 100%; /* White */
 
     --secondary: 205 30% 80%; /* Lighter Soft Blue */
@@ -34,7 +34,7 @@ body {
 
     --border: 205 30% 85%; /* Border based on Soft Blue, lighter */
     --input: 205 30% 85%; /* Input border, same as general border */
-    --ring: 173 58% 39%; /* Teal #2A9D8F for focus rings */
+    --ring: 232 44% 30%; /* Deep Blue #2B346F for focus rings */
     
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
@@ -65,7 +65,7 @@ body {
     --popover: 210 25% 15%;
     --popover-foreground: 206 33% 94%;
 
-    --primary: 173 58% 45%; /* Teal, slightly lighter for dark mode */
+    --primary: 232 44% 50%; /* Deep Blue #2B346F, adjusted for dark mode */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 205 30% 30%; 
@@ -82,7 +82,7 @@ body {
 
     --border: 205 30% 40%;
     --input: 205 30% 40%;
-    --ring: 173 58% 45%;
+    --ring: 232 44% 50%; /* Deep Blue #2B346F, adjusted for dark mode focus rings */
     
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;

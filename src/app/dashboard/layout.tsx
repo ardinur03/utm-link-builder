@@ -70,11 +70,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
     <SidebarProvider defaultOpen={true}>
       <Sidebar collapsible="icon">
-        <SidebarHeader className="p-2 flex justify-center items-center">
-            <Button variant="ghost" className="w-full justify-start px-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:p-0">
-              <LinkIconLucide className="h-5 w-5 group-data-[collapsible=icon]:size-5" />
-              <span className="group-data-[collapsible=icon]:hidden ml-2">UTM Tools</span>
-            </Button>
+        <SidebarHeader className="p-5 flex justify-center items-center">
+            <span className="group-data-[collapsible=icon]:hidden ml-2">Ebizmark Shortener Url</span>
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
