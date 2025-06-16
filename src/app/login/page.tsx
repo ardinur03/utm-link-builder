@@ -11,36 +11,50 @@ import { useToast } from "@/hooks/use-toast";
 import { LogIn, AlertCircle } from 'lucide-react';
 
 export default function LoginPage() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const { toast } = useToast();
 
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
     setError(null);
 
-    if (!username || !password) {
-      setError("Username and password are required.");
+    if (!apiBaseUrl) {
+      const errorMessage = "API base URL is not configured. Please contact support.";
+      setError(errorMessage);
+      setIsLoading(false);
+      toast({
+        title: "Configuration Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!email || !password) {
+      setError("Email and password are required.");
       setIsLoading(false);
       toast({
         title: "Login Failed",
-        description: "Username and password are required.",
+        description: "Email and password are required.",
         variant: "destructive",
       });
       return;
     }
     
     try {
-      const response = await fetch('https://ebizmark.info/api/auth/login', {
+      const response = await fetch(`${apiBaseUrl}/api/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
@@ -50,9 +64,13 @@ export default function LoginPage() {
         throw new Error(errorMessage);
       }
 
+      // Assuming data contains access_token as per your example
+      // console.log("Access Token:", data.access_token); 
+      // In a real app, you'd store this token (e.g., in localStorage or httpOnly cookie)
+
       toast({
         title: "Login Successful",
-        description: "Redirecting to dashboard...",
+        description: data.message || "Redirecting to dashboard...",
       });
       router.push('/dashboard');
 
@@ -83,15 +101,16 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="username" className="text-foreground">Username</Label>
+              <Label htmlFor="email" className="text-foreground">Email</Label>
               <Input 
-                id="username" 
-                placeholder="Enter your username" 
-                value={username} 
-                onChange={(e) => setUsername(e.target.value)}
+                id="email" 
+                type="email"
+                placeholder="Enter your email" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)}
                 className="focus:ring-primary focus:border-primary"
                 disabled={isLoading}
-                autoComplete="username"
+                autoComplete="email"
               />
             </div>
             <div className="space-y-2">
