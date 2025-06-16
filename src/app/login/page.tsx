@@ -95,11 +95,17 @@ export default function LoginPage() {
             Login
           </CardTitle>
           <CardDescription className="text-center pt-1 text-muted-foreground">
-            Access your Ebizmark UTM Dashboard.
+            Access your Ebizmark Shortener Url App.
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-6">
+            {error && (
+              <div className="flex items-center text-sm text-destructive bg-destructive/10 p-3 rounded-md">
+                <AlertCircle className="h-4 w-4 mr-2 flex-shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="email" className="text-foreground">Email</Label>
               <Input 
@@ -126,12 +132,6 @@ export default function LoginPage() {
                 autoComplete="current-password"
               />
             </div>
-            {error && (
-              <div className="flex items-center text-sm text-destructive bg-destructive/10 p-3 rounded-md">
-                <AlertCircle className="h-4 w-4 mr-2 flex-shrink-0" />
-                <span>{error}</span>
-              </div>
-            )}
           </CardContent>
           <CardFooter>
             <Button type="submit" className="w-full text-base py-3 active:scale-[0.98] transition-transform duration-100 ease-in-out" disabled={isLoading}>

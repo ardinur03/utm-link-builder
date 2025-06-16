@@ -2,6 +2,7 @@
 "use client";
 
 import type { ReactNode } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -24,6 +25,17 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { toast } = useToast();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      router.replace('/login');
+      setIsAuthenticated(false);
+    } else {
+      setIsAuthenticated(true);
+    }
+  }, [router]);
 
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -36,13 +48,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json', // Though no body is sent, it's good practice
+            'Content-Type': 'application/json',
           },
         });
-        // Assuming logout is successful or we want to proceed regardless
       } catch (error) {
         console.error("Logout API call failed:", error);
-        // Optionally, show an error toast, but still proceed to log out locally
         toast({
           title: "Logout Error",
           description: "Could not reach logout service, logging out locally.",
@@ -66,6 +76,18 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     router.push('/login');
   };
 
+  if (isAuthenticated === null) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
+        <p className="text-lg text-foreground">Loading dashboard...</p>
+      </main>
+    );
+  }
+
+  if (!isAuthenticated) {
+    // Should be redirected by useEffect, but as a fallback or if rendering happens before redirect completes.
+    return null; 
+  }
 
   return (
     <SidebarProvider defaultOpen={true}>
